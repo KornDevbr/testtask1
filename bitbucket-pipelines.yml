@@ -1,0 +1,53 @@
+pipelines:
+  branches:
+    master:
+      - step:
+          name: 'Deploying code to container'
+          image: 
+            name: atlassian/default-image:3
+            run-as-user: 0
+          script:
+            - wget https://github.com/devbranch-vadym/portainerssh/releases/download/v1.6.0/portainerssh-linux-amd64-1.6.0.tar.gz
+            - tar -x -f portainerssh-linux-amd64-1.6.0.tar.gz
+            - echo $BITBUCKET_COMMIT
+            - echo $BITBUCKET_GIT_HTTP_ORIGIN
+            - echo "export BITBUCKET_COMMIT=$BITBUCKET_COMMIT; export BITBUCKET_GIT_HTTP_ORIGIN=$BITBUCKET_GIT_HTTP_ORIGIN ; cd testtask; git fetch $BITBUCKET_GIT_HTTP_ORIGIN; git checkout origin/master -- docker4drupal/drup_deploy_bb.sh; cd docker4drupal; cp ./drup_deploy_bb.sh ../..; sh ../../drup_deploy_bb.sh; rm -r ../../drup_deploy_bb.sh; exit" | ./portainerssh korn_docker4drupal_test_project_php
+
+
+  pull-requests:
+    '**':
+      - parallel:
+        - step:
+            name: 'PHP coding standards checker'
+            image: wodby/drupal-php:8.1-dev-4.37.6
+            caches:
+             - composer
+            script:
+              - cd docker4drupal
+              - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s
+              - composer install
+              - export PATH="`pwd`/bin:$PATH"
+              - ./vendor/bin/phpcs --report=checkstyle --standard=Drupal,DrupalPractice ./web/modules/custom | reviewdog -f=checkstyle -reporter=bitbucket-code-report -fail-on-error -filter-mode=nofilter -tee
+
+        - step:
+            name: 'JS coding standards checker'
+            image: wodby/drupal-php:8.1-dev-4.37.6
+            caches:
+              - npm
+              - yarn
+              - composer  
+            script:
+              - sudo apk add nodejs
+              - sudo apk add npm
+              - npm install yarn
+              - cd docker4drupal
+              - curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s
+              - composer install
+              - yarn add --dev eslint-config-drupal-bundle eslint
+              - export PATH="`pwd`/bin:$PATH"
+              - yarn eslint ./web/modules/custom ./web/themes/custom ./web/profiles/custom --no-error-on-unmatched-pattern | reviewdog -f=eslint -reporter=bitbucket-code-report -fail-on-error -filter-mode=nofilter -tee
+
+definitions:
+  caches:
+    npm: ~/.npm/_cacache
+    yarn: ~/.cache/yarn/v6

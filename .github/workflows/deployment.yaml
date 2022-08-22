@@ -1,0 +1,25 @@
+name: Deployment on server when push master
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Installing PortainerSSH
+        run: |
+          wget https://github.com/devbranch-vadym/portainerssh/releases/download/v1.6.0/portainerssh-linux-amd64-1.6.0.tar.gz
+          tar -x -f portainerssh-linux-amd64-1.6.0.tar.gz  
+
+      - name: Launch a deployment script
+        env:
+          PORTAINER_API_URL: https://portainer.devbranch.work/api
+          PORTAINER_USER: ${{ secrets.PORTAINERSSH_USER }}
+          PORTAINER_PASSWORD: ${{ secrets.PORTAINERSSH_PASS }}
+        run: echo "cd testtask/docker4drupal; sh drup_deploy_gh.sh; exit" | ./portainerssh korn_docker4drupal_test_project_php

@@ -1,0 +1,64 @@
+name: Drupal JS code standards checker
+
+on: pull_request
+
+jobs:
+  eslint-checker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install drupal project
+        run: |
+          cd docker4drupal
+          composer install
+
+      - name: Node js installer
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+          cache-dependency-path: tools/package-lock.json
+          
+      - name: Install Yarn
+        run: |
+          npm -v
+          npm install yarn
+          
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v3
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-             
+      
+      - name: Install ESlint
+        run: |
+          ls -la
+          cd docker4drupal
+          ls -la
+          yarn add --dev eslint-config-drupal-bundle eslint
+          
+      - name: Installing reviewdog
+        uses: reviewdog/action-setup@v1
+        with:
+          reviewdog_version: latest
+
+      - name: JS code standards check
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ls -la
+          yarn eslint docker4drupal/web/modules/custom \
+          docker4drupal/web/themes/custom \
+          docker4drupal/web/profiles/custom \
+          --no-error-on-unmatched-pattern |
+          reviewdog -f=eslint -reporter=github-pr-review \
+          -fail-on-error -filter-mode=nofilter -tee
+

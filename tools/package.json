@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "yarn": "^1.22.19"
+  },
+  "devDependencies": {
+    "eslint": "^8.21.0",
+    "eslint-config-drupal-bundle": "^1.1.0"
+  }
+}

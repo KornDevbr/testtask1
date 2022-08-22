@@ -1,0 +1,8 @@
+docker4drupal/vendor/
+docker4drupal/web/core
+docker4drupal/web/libraries/
+docker4drupal/web/modules/contrib/
+docker4drupal/web/profiles/contrib/
+docker4drupal/web/themes/contrib/
+docker4drupal/drush/Commands
+
