@@ -11,7 +11,7 @@ pipelines:
             - tar -x -f portainerssh-linux-amd64-1.6.0.tar.gz
             - echo $BITBUCKET_COMMIT
             - echo $BITBUCKET_GIT_HTTP_ORIGIN
-            - echo "export BITBUCKET_COMMIT=$BITBUCKET_COMMIT; export BITBUCKET_GIT_HTTP_ORIGIN=$BITBUCKET_GIT_HTTP_ORIGIN ; cd testtask; git fetch $BITBUCKET_GIT_HTTP_ORIGIN; git checkout origin/master -- docker4drupal/drup_deploy_bb.sh; cd docker4drupal; cp ./drup_deploy_bb.sh ../..; sh ../../drup_deploy_bb.sh; rm -r ../../drup_deploy_bb.sh; exit" | ./portainerssh korn_docker4drupal_test_project_php
+            - echo "export BITBUCKET_COMMIT=$BITBUCKET_COMMIT; export BITBUCKET_GIT_HTTP_ORIGIN=$BITBUCKET_GIT_HTTP_ORIGIN ; cd testtask1; git fetch $BITBUCKET_GIT_HTTP_ORIGIN; git checkout origin/master -- docker4drupal/drup_deploy_bb.sh; cd docker4drupal; cp ./drup_deploy_bb.sh ../..; sh ../../drup_deploy_bb.sh; rm -r ../../drup_deploy_bb.sh; exit" | ./portainerssh korn_docker4drupal_test_project_php
 
 
   pull-requests:
