@@ -5,7 +5,7 @@ drush sset system.maintenance_mode TRUE
 
 # Make db backup
 mkdir ../../db_backup
-drush sql-dump --structure-tables-list=cache,cache_* --gzip --result-file=../../db_backup/backup-$(date +"%Y-%m-%d").sql
+drush sql-dump --structure-tables-list=cache,cache_* --gzip --result-file=../../../db_backup/backup-$(date +"%Y-%m-%d").sql
 
 
 BACKUP_COMMIT=$(git rev-parse HEAD)
