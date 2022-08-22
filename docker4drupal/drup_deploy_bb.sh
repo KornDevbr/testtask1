@@ -10,11 +10,6 @@ drush sql-dump --structure-tables-list=cache,cache_* --gzip --result-file=../../
 
 BACKUP_COMMIT=$(git rev-parse HEAD)
 
-
-# Fetch and checkout on new commit hash
-git fetch $BITBUCKET_GIT_HTTP_ORIGIN
-git checkout $BITBUCKET_COMMIT
-
 # Make functions to frequently using commands
 
 turn_off_mm () {				#turn off maintenance mode
@@ -27,6 +22,9 @@ comp_inst () {					#Installing composer without development modules
 	composer install -o --no-dev
 }
 
+# Fetch and checkout on new commit hash
+git fetch $BITBUCKET_GIT_HTTP_ORIGIN
+git checkout $BITBUCKET_COMMIT
 
 # If git pull made an error 
 if [ `echo $?` = 0 ]; then
