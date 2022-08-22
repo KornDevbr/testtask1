@@ -23,12 +23,12 @@ comp_inst () {					#Installing composer without development modules
 }
 
 # Fetch and checkout on new commit hash
-git remote add deploy $BITBUCKET_GIT_HTTP_ORIGIN
+
 git fetch deploy/master
 git checkout $BITBUCKET_COMMIT
 
 # If git pull made an error 
-if [ `echo $?` = !0 ]; then
+if [ `echo $?` != 0 ]; then
 
 	git_ch_out
 
@@ -47,7 +47,7 @@ fi
 comp_inst
 
 # If composer install made an error 
-if [ `echo $?` = 0 ]; then
+if [ `echo $?` != 0 ]; then
 	
 	git_ch_out	
 
@@ -69,7 +69,7 @@ fi
 drush deploy -v -y
 
 # If drush deploy made an error
-if [ `echo $?` = 0 ]; then
+if [ `echo $?` != 0 ]; then
 	
 	git_ch_out	
 
