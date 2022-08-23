@@ -24,7 +24,7 @@ comp_inst () {					#Installing composer without development modules
 
 # Fetch and checkout on new commit hash
 
-git fetch deploy/master
+git fetch $BITBUCKET_GIT_HTTP_ORIGIN 
 git checkout $BITBUCKET_COMMIT
 
 # If git pull made an error 
