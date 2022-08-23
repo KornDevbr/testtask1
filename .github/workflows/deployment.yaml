@@ -22,4 +22,5 @@ jobs:
           PORTAINER_API_URL: https://portainer.devbranch.work/api
           PORTAINER_USER: ${{ secrets.PORTAINERSSH_USER }}
           PORTAINER_PASSWORD: ${{ secrets.PORTAINERSSH_PASS }}
-        run: echo "cd testtask/docker4drupal; sh drup_deploy_gh.sh; exit" | ./portainerssh korn_docker4drupal_test_project_php
+          GITHUB_REPO_URL: https://github.com/$GITHUB_REPOSITORY
+        run: echo "export GITHUB_SHA=$GITHUB_SHA; export GITHUB_REPO_URL=$GITHUB_REPO_URL; cd testtask1; git remote add github-deploy $GITHUB_REPO_URL; git fetch github-deploy; git checkout $GITHUB_SHA -- docker4drupal/drup_deploy_gh.sh; cd docker4drupal; cp -a ./drup_deploy_gh.sh /tmp/drup_deploy_gh.sh; /tmp/drup_deploy_gh.sh; exit" | ./portainerssh korn_docker4drupal_test_project_php

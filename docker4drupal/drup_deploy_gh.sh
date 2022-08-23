@@ -4,66 +4,64 @@
 drush sset system.maintenance_mode TRUE
 
 # Make db backup
-mkdir ../../../db_backup
+mkdir ../../db_backup
 drush sql-dump --structure-tables-list=cache,cache_* --gzip --result-file=../../../db_backup/backup-$(date +"%Y-%m-%d").sql
 
-# Pull the master branch from the repository
-git pull https://github.com/KornDevbr/testtask.git master
+
+BACKUP_COMMIT=$(git rev-parse HEAD)
+
+# Make functions to frequently using commands
+
+turn_off_mm () {				#turn off maintenance mode
+	drush sset system.maintenance_mode FALSE
+}
+git_ch_out () {					#undo to previous working checkout
+	git checkout $BACKUP_COMMIT
+}
+comp_inst () {					#Installing composer without development modules
+	composer install -o --no-dev
+}
+
+# Fetch and checkout on new commit hash
+
+git fetch $GITHUB_REPO_URL
+git checkout $GITHUB_SHA
 
 # If git pull made an error 
 if [ `echo $?` != 0 ]; then
-	
-	# Make backup of broken database for auditing
-	mkdir ../../../db_backup_br
-	drush sql-dump --structure-tables-list=cache,cache_* --gzip --result-file=../../../db_backup_br/backup-$(date +"%Y-%m-%d").sql
 
-# Move back before "git pull"
-	git reset --hard HEAD@{1}
+	git_ch_out
 
-	# Restore database
-	zcat ../../db-backup/backup-$(date +"%Y-%m-%d").sql.gz | drush sql-cli
+	turn_off_mm
 
-	# Turn off Drupal maintence mode
-	drush sset system.maintenance_mode FALSE
-	
 	echo
 	echo
-	echo "Git pull error :("
+	echo "Git error :("
 	echo
 	echo
-
-	exit
+	exit 1
 	
 fi
 
 # Download all needed modules
-composer install -o --no-dev
+comp_inst
 
 # If composer install made an error 
 if [ `echo $?` != 0 ]; then
 	
-	# Make backup of broken database for auditing
-	drush sql-dump --structure-tables-list=cache,cache_* --gzip --result-file=../../../db_backup_br/backup-$(date +"%Y-%m-%d").sql
+	git_ch_out	
 
-	# Move back before "git pull"
-	git reset --hard HEAD@{1}
-
-	# Restore database
-	zcat ../../db-backup/backup-$(date +"%Y-%m-%d").sql.gz | drush sql-cli
-
-	# Restore all needed modules
-	composer install -o --no-dev
-
-	# Turn off Drupal maintence mode
-	drush sset system.maintenance_mode FALSE
+	comp_inst
 	
+	turn_off_mm
+
 	echo
 	echo
 	echo "Composer install error :("
 	echo
 	echo
 
-	exit
+	exit 1
 	
 fi
 
@@ -73,23 +71,14 @@ drush deploy -v -y
 # If drush deploy made an error
 if [ `echo $?` != 0 ]; then
 	
-	# Make backup of broken database for auditing
-	drush sql-dump --structure-tables-list=cache,cache_* --gzip --result-file=../../../db_backup_br/backup-$(date +"%Y-%m-%d").sql
+	git_ch_out	
 
-	# Move back before "git pull"
-	git reset --hard HEAD@{1}
-
-	# Restore database
-	zcat ../../db-backup/backup-$(date +"%Y-%m-%d").sql.gz | drush sql-cli
-
-	# Restore all needed modules
-	composer install -o --no-dev
+	comp_inst
 
 	# Restore deployment
 	drush deploy -v -y
 
-	# Turn off Drupal maintence mode
-	drush sset system.maintenance_mode FALSE
+	turn_off_mm
 
 	echo
 	echo
@@ -97,15 +86,12 @@ if [ `echo $?` != 0 ]; then
 	echo
 	echo
 
-	exit
+	exit 1
 	
 fi
 
 # Turn off Drupal maintence mode
-drush sset system.maintenance_mode FALSE
-
-# Clear caches
-drush cr
+turn_off_mm
 
 echo
 echo
