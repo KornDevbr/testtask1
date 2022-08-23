@@ -47,7 +47,7 @@ fi
 comp_inst
 
 # If composer install made an error 
-if [ `echo $?` = 0 ]; then
+if [ `echo $?` != 0 ]; then
 	
 	git_ch_out	
 
