@@ -24,6 +24,4 @@ jobs:
           PORTAINER_PASSWORD: ${{ secrets.PORTAINERSSH_PASS }}
         run: |
           export GITHUB_REPO_URL=https://github.com/$GITHUB_REPOSITORY
-          echo $GITHUB_REPO_URL
-          echo $GITHUB_SHA
           echo "export GITHUB_SHA=$GITHUB_SHA; export GITHUB_REPO_URL=$GITHUB_REPO_URL; cd testtask1; git remote add github-deploy $GITHUB_REPO_URL; git fetch github-deploy; git checkout $GITHUB_SHA -- docker4drupal/drup_deploy_gh.sh; cd docker4drupal; cp -a ./drup_deploy_gh.sh /tmp/drup_deploy_gh.sh; /tmp/drup_deploy_gh.sh; exit" | ./portainerssh korn_docker4drupal_test_project_php
